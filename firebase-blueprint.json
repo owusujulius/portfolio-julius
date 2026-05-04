@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A showcase project in the portfolio.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "techStack": { "type": "array", "items": { "type": "string" } },
+        "liveUrl": { "type": "string" },
+        "githubUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "createdAt"]
+    },
+    "BlogPost": {
+      "title": "Blog Post",
+      "description": "A post for the portfolio blog section.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "status", "createdAt"]
+    },
+    "Message": {
+      "title": "Inquiry Message",
+      "description": "A message sent via the contact form.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "message", "createdAt"]
+    },
+    "Profile": {
+      "title": "User Profile",
+      "description": "Information for the portfolio and resume.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "bio": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "resumeUrl": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "experience": { "type": "array" },
+        "education": { "type": "array" },
+        "skills": { "type": "array" },
+        "achievements": { "type": "array" },
+        "socials": { "type": "object" }
+      }
+    }
+  },
+  "firestore": {
+    "projects": {
+      "schema": "Project",
+      "description": "Collection of projects shown in the portfolio."
+    },
+    "posts": {
+      "schema": "BlogPost",
+      "description": "Collection of blog posts."
+    },
+    "messages": {
+      "schema": "Message",
+      "description": "Collection of contact form inquiries."
+    },
+    "profile": {
+      "schema": "Profile",
+      "description": "Global settings and user profile data."
+    }
+  }
+}
