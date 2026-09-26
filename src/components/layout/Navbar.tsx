@@ -2,28 +2,38 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Layout, PenTool, Mail, User, Code, FileText } from 'lucide-react';
-import { auth, db } from '../../lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabase';
+import { getProfile, type ProfileData } from '../../lib/profile';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(auth.currentUser);
-  const [profile, setProfile] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const location = useLocation();
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    let active = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (active) setUser(data.user ?? null);
     });
 
-    const unsubProfile = onSnapshot(doc(db, 'profile', 'main'), (doc) => {
-      if (doc.exists()) setProfile(doc.data());
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) setUser(session?.user ?? null);
     });
+
+    getProfile()
+      .then((data) => {
+        if (active) setProfile(data);
+      })
+      .catch(() => {
+        if (active) setProfile(null);
+      });
 
     return () => {
-      unsubAuth();
-      unsubProfile();
+      active = false;
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
@@ -35,7 +45,7 @@ export default function Navbar() {
     { name: 'Contact', href: '/contact', icon: Mail },
   ];
 
-  const isAdmin = user?.email === 'mensahayford777@gmail.com';
+  const isAdmin = Boolean(user && profile?.user_id === user.id);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md transition-colors duration-300">
@@ -61,13 +71,15 @@ export default function Navbar() {
                   key={link.name}
                   to={link.href}
                   className={`text-sm font-medium transition-colors hover:text-indigo-600 ${
-                    location.pathname === link.href ? 'text-indigo-600' : 'text-slate-600'
+                    location.pathname === link.href || (link.href !== '/' && location.pathname.startsWith(link.href))
+                      ? 'text-indigo-600'
+                      : 'text-slate-600'
                   }`}
                 >
                   {link.name}
                 </Link>
               ))}
-              
+
               <div className="h-4 w-px bg-slate-200 mx-2" />
 
               {isAdmin && (
@@ -81,10 +93,10 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile buttons */}
           <div className="flex items-center gap-2 md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
               className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-500 focus:outline-none"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -93,7 +105,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Nav */}
       <AnimatePresence>
         {isOpen && (
           <motion.div

@@ -1,4 +1,6 @@
 {
+  "include": ["src", "vite.config.ts", "server.ts", "scripts"],
+  "exclude": ["node_modules", "dist", "supabase/functions"],
   "compilerOptions": {
     "target": "ES2022",
     "experimentalDecorators": true,

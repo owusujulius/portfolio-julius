@@ -1,52 +1,41 @@
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, orderBy, getDocs, where } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Tag, ChevronRight, Search, X } from 'lucide-react';
+import { Search, X, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { fetchPosts, type Post } from '../lib/content';
 import { formatDate } from '../lib/utils';
-
-interface Post {
-  id: string;
-  title: string;
-  excerpt?: string;
-  category?: string;
-  createdAt: any;
-  status: string;
-}
 
 export default function Blog() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    async function fetchPosts() {
-      const path = 'posts';
-      try {
-        const q = query(
-          collection(db, path),
-          where('status', '==', 'published'),
-          orderBy('createdAt', 'desc')
-        );
-        const snapshot = await getDocs(q);
-        setPosts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post)));
-      } catch (error) {
-        console.warn("Could not fetch published posts", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchPosts();
+    let active = true;
+    fetchPosts({ publishedOnly: true })
+      .then((data) => {
+        if (active) setPosts(data);
+      })
+      .catch(() => {
+        if (active) setError('Articles are temporarily unavailable.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return posts;
     const term = searchTerm.toLowerCase();
-    return posts.filter(post => 
-      post.title.toLowerCase().includes(term) || 
-      (post.excerpt && post.excerpt.toLowerCase().includes(term)) ||
-      (post.category && post.category.toLowerCase().includes(term))
+    return posts.filter((post) =>
+      post.title.toLowerCase().includes(term)
+      || post.excerpt.toLowerCase().includes(term)
+      || post.category.toLowerCase().includes(term)
+      || post.tags.some((tag) => tag.toLowerCase().includes(term)),
     );
   }, [posts, searchTerm]);
 
@@ -70,10 +59,7 @@ export default function Blog() {
             className="block w-full rounded-2xl border-0 bg-white py-3 pl-12 pr-10 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
           />
           {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="absolute inset-y-0 right-0 flex items-center pr-3"
-            >
+            <button onClick={() => setSearchTerm('')} aria-label="Clear search" className="absolute inset-y-0 right-0 flex items-center pr-3">
               <X className="h-4 w-4 text-slate-400 hover:text-slate-600" />
             </button>
           )}
@@ -81,24 +67,15 @@ export default function Blog() {
       </div>
 
       {loading ? (
-        <div className="space-y-8">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-48 animate-pulse rounded-2xl bg-slate-100" />
-          ))}
-        </div>
+        <div className="space-y-8">{[1, 2, 3].map((i) => <div key={i} className="h-48 animate-pulse rounded-2xl bg-slate-100" />)}</div>
+      ) : error ? (
+        <div className="rounded-3xl border border-red-200 bg-red-50 p-12 text-center text-red-700">{error}</div>
       ) : filteredPosts.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-20 text-center border-2 border-dashed border-slate-200 rounded-3xl">
           <p className="text-slate-500">
-            {searchTerm ? "No articles found matching your search." : "No blog posts published yet. Check back soon!"}
+            {searchTerm ? 'No articles found matching your search.' : 'No blog posts published yet. Check back soon!'}
           </p>
-          {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="mt-4 text-indigo-600 font-semibold hover:text-indigo-500"
-            >
-              Clear search filter
-            </button>
-          )}
+          {searchTerm && <button onClick={() => setSearchTerm('')} className="mt-4 text-indigo-600 font-semibold hover:text-indigo-500">Clear search filter</button>}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
@@ -114,8 +91,8 @@ export default function Blog() {
                 className="group relative flex flex-col items-start"
               >
                 <div className="flex items-center gap-x-4 text-xs">
-                  <time dateTime={post.createdAt?.toDate().toISOString()} className="text-slate-500">
-                    {formatDate(post.createdAt?.toDate() || new Date())}
+                  <time dateTime={post.published_at || post.created_at} className="text-slate-500">
+                    {formatDate(post.published_at || post.created_at)}
                   </time>
                   {post.category && (
                     <span className="relative z-10 rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-200 transition-colors">
@@ -125,14 +102,12 @@ export default function Blog() {
                 </div>
                 <div className="group relative">
                   <h3 className="mt-3 text-2xl font-bold leading-6 text-slate-900 group-hover:text-indigo-600 transition-colors">
-                    <Link to={`/blog/${post.id}`}>
+                    <Link to={`/blog/${post.slug}`}>
                       <span className="absolute inset-0" />
                       {post.title}
                     </Link>
                   </h3>
-                  <p className="mt-5 text-sm leading-relaxed text-slate-600 sm:text-base">
-                    {post.excerpt}
-                  </p>
+                  <p className="mt-5 text-sm leading-relaxed text-slate-600 sm:text-base">{post.excerpt}</p>
                 </div>
                 <div className="mt-6 flex items-center text-sm font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform">
                   Read article <ChevronRight size={16} />

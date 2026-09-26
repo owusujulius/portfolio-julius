@@ -1,29 +1,34 @@
 # Security Specification - My Portfolio
 
-## Data Invariants
-1. A project must have a title and createdAt timestamp.
-2. Only the authenticated owner (verified email) can create, update, or delete projects and blog posts.
-3. Anyone can read published blog posts and projects.
-4. Anyone can submit a contact message, but only the owner can read or delete them.
-5. All IDs must be strictly validated.
-6. Only the owner can update the profile data.
+## Data invariants
 
-## The Dirty Dozen Payloads (Rejection Tests)
-1. **Unauthorized Write**: Unauthenticated user trying to create a project.
-2. **Identity Spoofing**: User A trying to update a project.
-3. **Shadow Update**: Adding a field `isAdmin: true` to a profile document.
-4. **Invalid Type**: Sending a boolean for `title`.
-5. **Too Long ID**: Using a 1KB string as document ID.
-6. **Malicious Link**: Injecting a large string into `liveUrl`.
-7. **Bypassing Verification**: Writing with an unverified email.
-8. **Resource Poisoning**: Sending a 1MB string in `description`.
-9. **State Shortcut**: Changing a blog post status to 'published' without owning it.
-10. **Timestamp Fraud**: Providing a future timestamp instead of server time.
-11. **Orphaned Record**: Creating a blog post without a verified author context.
-12. **PII Leak**: Accessing the `messages` collection without being the owner.
+1. Only the authenticated portfolio owner can create, update, or delete projects, posts, and profile data.
+2. Public users can read only published projects and posts.
+3. The profile and its public resume data are readable by everyone.
+4. Messages are private to the owner. Only the server-side contact function may create them.
+5. Message content and creation timestamps are immutable after insertion.
+6. All slugs, URLs, lengths, and array sizes are validated.
+7. Service-role credentials are never exposed to the browser.
+8. Media uploads are restricted to the authenticated owner folder.
 
-## Firestore Rules Pattern
-- **isValidId**: Matches `^[a-zA-Z0-9_\-]+$` and size <= 128.
-- **isOwner**: Checks if `request.auth.uid` is the designated owner UID.
-- **Strict Keys**: Enforces exact field sets for creation and specific white-lists for updates.
-- **Terminal State**: Once a message is sent, it cannot be edited.
+## Rejection tests
+
+1. Anonymous user creating a project.
+2. Non-owner user updating a project.
+3. Owner writing an unexpected field such as `owner_id` or `is_admin`.
+4. Invalid post status or oversized content.
+5. Duplicate or malformed slug.
+6. Contact function receiving an invalid email or oversized message.
+7. Contact function receiving more than the allowed number of requests.
+8. Anonymous user reading the `messages` table.
+9. Non-owner user changing message content instead of read state.
+10. Storage upload outside the owner's folder.
+
+## RLS design
+
+- `profiles`, `profile_links`, `experience`, `education`, `skills`, and `achievements` are publicly readable.
+- `projects` and `posts` are publicly readable only when `status = 'published'`.
+- Owner writes use `auth.uid() = owner_id` or the owning profile relation.
+- `messages` has no insert policy for `anon` or `authenticated`; the Edge Function uses the service role.
+- `contact_rate_limits` is private and accessible only to the server-side function.
+- Public media reads are allowed only from the `portfolio-media` bucket; writes require an owner folder path.

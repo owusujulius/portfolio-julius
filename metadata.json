@@ -1,6 +1,6 @@
 {
   "name": "My Portfolio",
-  "description": "A high-performance, professional developer portfolio with an integrated CMS for projects, blogging, and profile management.",
+  "description": "A professional developer portfolio with Supabase-backed projects, publishing, messaging, and profile management.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["supabase-auth", "supabase-postgres", "supabase-storage", "supabase-edge-functions"]
 }
