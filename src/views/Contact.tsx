@@ -71,12 +71,12 @@ export default function Contact() {
                 <dl className="mt-4 space-y-4 text-base leading-7 text-slate-600">
                   <div className="flex gap-x-4">
                     <dt className="flex-none"><Mail className="h-7 w-6 text-indigo-600" /></dt>
-                    <dd>{profile?.email || 'mensahayford777@gmail.com'}</dd>
+                    <dd>{profile?.email || 'mole54501@gmail.com'}</dd>
                   </div>
                   {socials?.linkedin && <div className="flex gap-x-4"><dt className="flex-none"><Linkedin className="h-7 w-6 text-indigo-600" /></dt><dd><a href={socials.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600">LinkedIn Profile</a></dd></div>}
                   {socials?.twitter && <div className="flex gap-x-4"><dt className="flex-none"><Twitter className="h-7 w-6 text-indigo-600" /></dt><dd><a href={socials.twitter} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600">Twitter / X</a></dd></div>}
                   {socials?.instagram && <div className="flex gap-x-4"><dt className="flex-none"><Instagram className="h-7 w-6 text-indigo-600" /></dt><dd><a href={socials.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600">Instagram</a></dd></div>}
-                  {socials?.whatsapp && <div className="flex gap-x-4"><dt className="flex-none"><MessageSquare className="h-7 w-6 text-indigo-600" /></dt><dd><a href={`https://wa.me/${socials.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600">WhatsApp</a></dd></div>}
+                  {socials?.whatsapp ? <div className="flex gap-x-4"><dt className="flex-none"><MessageSquare className="h-7 w-6 text-indigo-600" /></dt><dd><a href={`https://wa.me/${socials.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600">WhatsApp</a></dd></div> : <div className="flex gap-x-4"><dt className="flex-none"><MessageSquare className="h-7 w-6 text-indigo-600" /></dt><dd><a href="https://wa.me/233532851004" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600">WhatsApp</a></dd></div>}
                 </dl>
               </div>
 
