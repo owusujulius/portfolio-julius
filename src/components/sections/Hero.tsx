@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Code, Sparkles } from 'lucide-react';
+import { ArrowRight, Code, Sparkles, Github, Linkedin, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getProfile, type ProfileData } from '../../lib/profile';
 
@@ -22,16 +22,16 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden pt-20 pb-16 lg:pt-32 lg:pb-24">
-      <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-indigo-50 blur-3xl opacity-50" />
-      <div className="absolute bottom-0 left-0 -ml-16 -mb-16 h-64 w-64 rounded-full bg-blue-50 blur-3xl opacity-50" />
+      <div className="absolute top-0 right-0 -mr-16 -mt-16 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 blur-3xl opacity-60" />
+      <div className="absolute bottom-0 left-0 -ml-16 -mb-16 h-96 w-96 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 blur-3xl opacity-60" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center space-x-2 rounded-full bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-200">
-            <Sparkles size={14} /><span>Available for new projects</span>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center space-x-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 px-5 py-2 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-200 shadow-sm">
+            <Sparkles size={14} className="text-indigo-600" /><span>Available for new projects</span>
           </motion.div>
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mt-8 max-w-4xl text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mt-8 max-w-4xl text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900">
             {intro}
           </motion.h1>
 
@@ -40,12 +40,18 @@ export default function Hero() {
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link to="/projects" className="group inline-flex items-center justify-center rounded-full bg-indigo-600 px-8 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 hover:shadow-indigo-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">View My Work<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
-            <Link to="/contact" className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 transition-all hover:bg-slate-50">Contact Me</Link>
+            <Link to="/projects" className="group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:shadow-indigo-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">View My Work<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+            <Link to="/contact" className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-slate-900 shadow-md ring-1 ring-inset ring-slate-200 transition-all hover:bg-slate-50 hover:shadow-lg">Contact Me</Link>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }} className="mt-20 grid grid-cols-2 gap-8 text-slate-500 sm:grid-cols-4 lg:grid-cols-6">
-            {['React', 'TypeScript', 'Node.js', 'Supabase', 'SQL', 'Cloud'].map((skill) => <div key={skill} className="flex items-center justify-center space-x-2 text-slate-600"><Code size={16} /><span className="text-sm font-medium">{skill}</span></div>)}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }} className="mt-12 flex items-center justify-center gap-6">
+            {profile?.socials?.github && <a href={profile.socials.github} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-900 hover:text-white hover:scale-110"><Github size={20} /></a>}
+            {profile?.socials?.linkedin && <a href={profile.socials.linkedin} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-blue-600 hover:text-white hover:scale-110"><Linkedin size={20} /></a>}
+            <a href="mailto:mole54501@gmail.com" className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-indigo-600 hover:text-white hover:scale-110"><Mail size={20} /></a>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.6 }} className="mt-16 grid grid-cols-2 gap-6 text-slate-500 sm:grid-cols-4 lg:grid-cols-6">
+            {['React', 'TypeScript', 'Node.js', 'PHP', 'MySQL', 'Supabase'].map((skill) => <div key={skill} className="flex items-center justify-center space-x-2 rounded-xl bg-white px-4 py-2 text-slate-600 shadow-sm ring-1 ring-slate-100"><Code size={16} /><span className="text-sm font-medium">{skill}</span></div>)}
           </motion.div>
         </div>
       </div>
